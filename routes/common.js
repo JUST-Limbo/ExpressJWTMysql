@@ -1,14 +1,15 @@
 const express = require('express')
-const User = require('../models/user')
 
 const ENCRYPT = require('../utils/encrypt')
 const checkLogin = require('../utils/checkLogin')
+
+const _QUERY = require('../utils/query')
 
 const router = express.Router()
 
 router.use(function (req, res, next) {
   if ((req.url == "/register" || req.url == "/login")) {
-    if (!req.body.email || !req.body.password) {
+    if (!req.body.username || !req.body.password) {
       return next({
         retcode: "000001",
         retinfo: "Params error"
@@ -20,72 +21,65 @@ router.use(function (req, res, next) {
 
 router.post("/register", function (req, res, next) {
   var body = req.body
-  User.findOne({
-    email: body.email
-  }, function (err, data) {
-    if (err) return next(err)
-
-    if (data) return res.status(200).json({
-      retcode: "000001",
-      retinfo: 'Username already exist'
-    })
-
-    // body.password = ENCRYPT(body.password)
-    new User(body).save(function (err, user) {
-      if (err) {
-        console.log(err.message);
-        return next(err)
+  var sql1 = `select * from userlist where username=? `
+  _QUERY(sql1, [body.username])
+    .then((result) => {
+      if (result.length > 0) {
+        return res.status(200).json({
+          retcode: "000001",
+          retinfo: 'Username already exist'
+        })
+      } else {
+        var sql2 = `insert into userlist set ?`
+        return _QUERY(sql2, [body])
       }
-
-      req.session.user = user
-      res.status(200).json({
-        retcode: "000000",
-        retinfo: 'Succeeded',
-        data: {
-          email: user.email,
-          nick_name: user.nick_name,
-          created_name: user.created_name.toLocaleString(),
-          last_modified_time: user.last_modified_time.toLocaleString(),
-          avatar: user.avatar,
-          gender: user.gender,
-          status: user.status
-        }
+    })
+    .then((result) => {
+      if (result.affectedRows > 0) {
+        return res.status(200).json({
+          retcode: "000000",
+          retinfo: 'Succeeded'
+        })
+      } else {
+        return res.status(200).json({
+          retcode: "000001",
+          retinfo: 'Register failed'
+        })
+      }
+    })
+    .catch((err) => {
+      return res.status(200).send({
+        retcode: "000001",
+        retinfo: 'SQL Failed'
       })
     })
-  })
 })
 
 router.post("/login", function (req, res, next) {
   var body = req.body
-
-  User.findOne({
-    email: body.email,
-    password: body.password
-    // password: ENCRYPT(body.password)
-  }, function (err, user) {
+  pool.query(`select * from userlist where username=? and 
+  password=?`, [body.username, body.password], (err, result) => {
     if (err) {
-      console.log(err.message);
-      return next(err)
+      return res.status(200).send({
+        retcode: "00000",
+        retinfo: 'SQL Failed'
+      })
+    };
+    if (result.length == 1) {
+      req.session.user = result[0].username
+      res.status(200).json({
+        retcode: "000000",
+        retinfo: 'Succeeded',
+        data: {
+          username: result[0].username
+        }
+      })
+    } else {
+      res.status(200).json({
+        retcode: "000001",
+        retinfo: "Incorrect username or password."
+      })
     }
-    if (!user) return res.status(200).json({
-      retcode: "000001",
-      retinfo: "Incorrect username or password."
-    })
-
-    req.session.user = user
-    res.status(200).json({
-      retcode: "000000",
-      retinfo: 'Succeeded',
-      data: {
-        email: user.email,
-        nick_name: user.nick_name,
-        created_name: user.created_name.toLocaleString(),
-        last_modified_time: user.last_modified_time.toLocaleString(),
-        avatar: user.avatar,
-        gender: user.gender,
-        status: user.status
-      }
-    })
   })
 })
 

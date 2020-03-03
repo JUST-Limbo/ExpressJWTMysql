@@ -1,7 +1,10 @@
-var databaseName = "123"
-var URI = "mongodb://localhost:27017/" + databaseName
-
-
-module.exports = {
-  URI
-}
+const mysql = require("mysql");
+var pool = mysql.createPool({
+	host: "127.0.0.1",
+	port: "3306",
+	user: "root",
+	password: "root",
+	database: "abc",
+	connectionLimit: 20
+})
+module.exports = pool; 
