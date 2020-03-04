@@ -58,10 +58,10 @@ router.post("/login", async function (req, res, next) {
     var body = req.body
     var sql1 = `select * from userlist where username=? and 
   password=?`
-    var result1 =await QUERY(sql1, [body.username, body.password])
+    var result1 = await QUERY(sql1, [body.username, body.password])
     if (result1.length == 1) {
       req.session.user = result1[0].username
-      res.status(200).json({
+      return res.status(200).json({
         retcode: "000000",
         retinfo: 'Succeeded',
         data: {
@@ -69,7 +69,7 @@ router.post("/login", async function (req, res, next) {
         }
       })
     } else {
-      res.status(200).json({
+      return res.status(200).json({
         retcode: "000001",
         retinfo: "Incorrect username or password."
       })
