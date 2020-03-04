@@ -3,7 +3,7 @@ const express = require('express')
 const ENCRYPT = require('../utils/encrypt')
 const checkLogin = require('../utils/checkLogin')
 
-const _QUERY = require('../utils/query')
+const QUERY = require('../utils/query')
 
 const router = express.Router()
 
@@ -19,23 +19,20 @@ router.use(function (req, res, next) {
   next()
 })
 
-router.post("/register", function (req, res, next) {
-  var body = req.body
-  var sql1 = `select * from userlist where username=? `
-  _QUERY(sql1, [body.username])
-    .then((result) => {
-      if (result.length > 0) {
-        return res.status(200).json({
-          retcode: "000001",
-          retinfo: 'Username already exist'
-        })
-      } else {
-        var sql2 = `insert into userlist set ?`
-        return _QUERY(sql2, [body])
-      }
-    })
-    .then((result) => {
-      if (result.affectedRows > 0) {
+router.post("/register", async function (req, res, next) {
+  try {
+    var body = req.body
+    var sql1 = `select * from userlist where username=? `
+    var result1 = await QUERY(sql1, [body.username])
+    if (result1.length > 0) {
+      return res.status(200).json({
+        retcode: "000001",
+        retinfo: 'Username already exist'
+      })
+    } else {
+      var sql2 = `insert into userlist set ?`
+      var result2 = await QUERY(sql2, [body])
+      if (result2.affectedRows > 0) {
         return res.status(200).json({
           retcode: "000000",
           retinfo: 'Succeeded'
@@ -46,32 +43,29 @@ router.post("/register", function (req, res, next) {
           retinfo: 'Register failed'
         })
       }
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(200).send({
+      retcode: "000001",
+      retinfo: 'SQL Failed'
     })
-    .catch((err) => {
-      return res.status(200).send({
-        retcode: "000001",
-        retinfo: 'SQL Failed'
-      })
-    })
+  }
 })
 
-router.post("/login", function (req, res, next) {
-  var body = req.body
-  pool.query(`select * from userlist where username=? and 
-  password=?`, [body.username, body.password], (err, result) => {
-    if (err) {
-      return res.status(200).send({
-        retcode: "00000",
-        retinfo: 'SQL Failed'
-      })
-    };
-    if (result.length == 1) {
-      req.session.user = result[0].username
+router.post("/login", async function (req, res, next) {
+  try {
+    var body = req.body
+    var sql1 = `select * from userlist where username=? and 
+  password=?`
+    var result1 =await QUERY(sql1, [body.username, body.password])
+    if (result1.length == 1) {
+      req.session.user = result1[0].username
       res.status(200).json({
         retcode: "000000",
         retinfo: 'Succeeded',
         data: {
-          username: result[0].username
+          username: result1[0].username
         }
       })
     } else {
@@ -80,7 +74,13 @@ router.post("/login", function (req, res, next) {
         retinfo: "Incorrect username or password."
       })
     }
-  })
+  } catch (err) {
+    console.log(err);
+    return res.status(200).send({
+      retcode: "00000",
+      retinfo: 'SQL Failed'
+    })
+  }
 })
 
 router.get("/logout", checkLogin, function (req, res, next) {
