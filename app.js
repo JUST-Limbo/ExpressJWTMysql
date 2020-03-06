@@ -6,7 +6,7 @@ var bodyParser = require('body-parser')
 var session = require('express-session')
 
 // 自定义模块
-var routes=require('./routes')
+var routes = require('./routes')
 var { accessLogStream } = require('./config/morgan.config')
 
 
@@ -26,7 +26,10 @@ app.use(session({
   secret: 'miwen',
   resave: true,
   // 无论是否使用session默认分配一把钥匙
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 24 * 60 * 60 * 1000
+  }
 }))
 
 
