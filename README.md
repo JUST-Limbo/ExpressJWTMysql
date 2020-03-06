@@ -1,5 +1,5 @@
 # ExpressMySQL
-随便玩一下
+Express + MySQL + session
 
 ## 安装
 
