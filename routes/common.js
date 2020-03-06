@@ -60,7 +60,7 @@ router.post("/login", async function (req, res, next) {
   password=?`
     var result1 = await QUERY(sql1, [body.username, body.password])
     if (result1.length == 1) {
-      req.session.user = result1[0].username
+      req.session.user = JSON.stringify(result1[0])
       return res.status(200).json({
         retcode: "000000",
         retinfo: 'Succeeded',
