@@ -35,7 +35,9 @@ router.post("/register", async function (req, res, next) {
       var result2 = await QUERY(sql2, [body])
 
       if (result2.affectedRows > 0) {
-        var token=JWT.createToken(body.username)
+        var token = JWT.createToken({
+          username: body.username
+        })
         return res.status(200).json({
           token,
           retcode: "000000",
@@ -66,9 +68,8 @@ router.post("/login", async function (req, res, next) {
     if (result1.length == 1) {
       var sql2 = `select * from userlist where username=? and password=?`
       var result2 = await QUERY(sql2, [body.username, body.password])
-
       if (result2.length == 1) {
-        var token = JWT.createToken(JSON.stringify(result2[0]))
+        var token = JWT.createToken(JSON.stringify(result2[0].username))
         return res.status(200).json({
           data: {
             token
@@ -82,10 +83,10 @@ router.post("/login", async function (req, res, next) {
           retcode: "000001"
         })
       }
-    }else{
+    } else {
       return res.status(404).send({
-        retinfo:"未注册的用户名",
-        retcode:"000001"
+        retinfo: "未注册的用户名",
+        retcode: "000001"
       })
     }
   } catch (err) {
