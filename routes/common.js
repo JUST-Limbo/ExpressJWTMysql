@@ -1,11 +1,11 @@
 const express = require('express')
+const router = express.Router()
 
 const ENCRYPT = require('../utils/encrypt')
 const checkLogin = require('../utils/checkLogin')
 
 const QUERY = require('../utils/query')
 
-const router = express.Router()
 
 router.use(function (req, res, next) {
   if ((req.url == "/register" || req.url == "/login")) {
@@ -46,7 +46,7 @@ router.post("/register", async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    return res.status(200).send({
+    return res.status(500).send({
       retcode: "000001",
       retinfo: 'SQL Failed'
     })
@@ -62,7 +62,7 @@ router.post("/login", async function (req, res, next) {
     if (result1.length == 1) {
       req.session.regenerate(function (err) {
         if (err) {
-          return res.json({
+          return res.status(500).json({
             retcode: "000001",
             retinfo: 'session regenerate error'
           });
@@ -84,7 +84,7 @@ router.post("/login", async function (req, res, next) {
     }
   } catch (err) {
     console.log(err);
-    return res.status(200).send({
+    return res.status(500).send({
       retcode: "00000",
       retinfo: 'SQL Failed'
     })
@@ -95,7 +95,7 @@ router.get("/logout", checkLogin, function (req, res, next) {
   // delete req.session.user
   req.session.destroy(function (err) {
     if (err) {
-      return res.status(200).json({
+      return res.status(500).json({
         retcode: "000001",
         retinfo: 'session destroy error'
       })
