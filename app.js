@@ -3,7 +3,6 @@ var express = require('express');
 var path = require('path');
 var morgan = require('morgan');
 var bodyParser = require('body-parser')
-var session = require('express-session')
 
 // 自定义模块
 var routes = require('./routes')
@@ -21,16 +20,6 @@ app.use(bodyParser.json())
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-// session
-app.use(session({
-  secret: 'miwen',
-  resave: true,
-  // 无论是否使用session默认分配一把钥匙
-  saveUninitialized: false,
-  cookie: {
-    maxAge: 24 * 60 * 60 * 1000
-  }
-}))
 
 
 // 静态文件托管
