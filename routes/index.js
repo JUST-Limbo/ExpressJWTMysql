@@ -1,7 +1,5 @@
-var entranceLog= require('../utils/entrance')
-
+var entranceLog= require('../middleware/entrance')
 
 module.exports=function(app){
-  app.use(entranceLog)
-  app.use("/jwt",require('./jwt'))
+  app.use(entranceLog())
 }

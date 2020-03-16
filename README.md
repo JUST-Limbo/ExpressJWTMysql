@@ -1,5 +1,5 @@
 # ExpressMySQL
-Express + MySQL + session
+Express + MySQL + JWT
 
 ## 安装
 
