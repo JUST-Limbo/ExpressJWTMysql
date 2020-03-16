@@ -12,7 +12,7 @@ function createToken(payload) {
 function checkToken(token) {
   return new Promise((resolve, reject) => {
     jwt.verify(token, secret, (err, data) => {
-      if (err) { reject('token verify failed') }
+      if (err) { reject('token校验失败') }
       resolve(data)
     })
   })
